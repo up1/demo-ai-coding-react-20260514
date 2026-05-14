@@ -13,8 +13,8 @@
 | Password    | Required, minimum 8 characters | "Password must be at least 8 characters long." |
 
 ## User Interface
-- The login page use template from file `login.html`
-- Use style guide from file `DESIGN.md` for consistent design
+- MUST use login page template from file `login.html`
+- MUST use style guide from file `DESIGN.md` for consistent design
 - The login form should be centered on the page and responsive to different screen sizes
 
 ## Error Handling
