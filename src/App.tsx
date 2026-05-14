@@ -1,121 +1,201 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import type { FormEvent } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [usernameError, setUsernameError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
+
+  const validateEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+  const validateForm = () => {
+    let valid = true
+    setUsernameError('')
+    setPasswordError('')
+
+    if (!username.trim() || !validateEmail(username.trim())) {
+      setUsernameError('Please enter a valid email address.')
+      valid = false
+    }
+
+    if (!password || password.length < 8) {
+      setPasswordError('Password must be at least 8 characters long.')
+      valid = false
+    }
+
+    return valid
+  }
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setErrorMessage('')
+
+    if (!validateForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 700))
+
+      const normalizedUsername = username.trim().toLowerCase()
+
+      if (normalizedUsername === 'server.error@example.com') {
+        throw new Error('server')
+      }
+
+      if (
+        normalizedUsername === 'user@example.com' &&
+        password === 'password123'
+      ) {
+        setIsRedirecting(true)
+        window.location.assign('/dashboard')
+        return
+      }
+
+      setErrorMessage('Invalid username or password. Please try again.')
+    } catch {
+      setErrorMessage(
+        'An error occurred while trying to log in. Please try again later.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
+    <div className="page-root">
+      <div className="grid-overlay" aria-hidden="true"></div>
+      <div className="scanline-overlay" aria-hidden="true"></div>
+
+      <main className="login-shell">
+        <header className="brand-block">
+          <h1 className="brand-title neon-text-pink">NEON TOKYO</h1>
+          <p className="brand-subtitle neon-text-cyan">
+            Neural Grid Authentication
           </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        </header>
 
-      <div className="ticks"></div>
+        <div className="login-card neon-border-pink">
+          <span className="card-corner card-corner-tl" aria-hidden="true" />
+          <span className="card-corner card-corner-br" aria-hidden="true" />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          <form className="login-form" onSubmit={handleSubmit} noValidate>
+            <div className="field-group">
+              <label htmlFor="username" className="field-label">
+                <span className="material-symbols-outlined field-label-icon">
+                  person
+                </span>
+                Identity handle
+              </label>
+              <input
+                id="username"
+                name="username"
+                type="email"
+                autoComplete="username"
+                className={`field-input field-input-uppercase ${
+                  usernameError ? 'field-input-error' : ''
+                }`}
+                placeholder="USER_ID"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                aria-invalid={Boolean(usernameError)}
+                aria-describedby={usernameError ? 'username-error' : undefined}
+              />
+              {usernameError && (
+                <p id="username-error" className="field-error" role="alert">
+                  {usernameError}
+                </p>
+              )}
+            </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+            <div className="field-group">
+              <label htmlFor="password" className="field-label">
+                <span className="material-symbols-outlined field-label-icon">
+                  lock
+                </span>
+                Encryption key
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                className={`field-input ${
+                  passwordError ? 'field-input-error' : ''
+                }`}
+                placeholder="********"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                aria-invalid={Boolean(passwordError)}
+                aria-describedby={passwordError ? 'password-error' : undefined}
+              />
+              {passwordError && (
+                <p id="password-error" className="field-error" role="alert">
+                  {passwordError}
+                </p>
+              )}
+            </div>
+
+            {errorMessage && (
+              <p className="form-error" role="alert">
+                {errorMessage}
+              </p>
+            )}
+
+            {isRedirecting && (
+              <p className="form-success" role="status">
+                ACCESS GRANTED // Routing to dashboard...
+              </p>
+            )}
+
+            <div className="submit-wrap">
+              <button
+                type="submit"
+                className="submit-button"
+                disabled={isSubmitting}
+              >
+                <span>{isSubmitting ? 'Authenticating...' : 'Enter the Grid'}</span>
+                <span className="material-symbols-outlined">
+                  {isSubmitting ? 'hourglass_top' : 'login'}
+                </span>
+              </button>
+            </div>
+
+            <div className="helper-row">
+              <a href="#" className="helper-link">
+                Forgot Credentials?
+              </a>
+            </div>
+          </form>
+        </div>
+
+        <footer className="status-block">
+          <div className="status-line">
+            <span className="status-dot" aria-hidden="true" />
+            <span>System Online // Grid_Status: Stable</span>
+          </div>
+          <div className="footer-links">
+            <a href="#">Protocol</a>
+            <a href="#">Grid_Terms</a>
+            <a href="#">Support</a>
+          </div>
+          <p className="copyright">
+            SYSTEM STATUS: ENCRYPTED // © 20XX NEON_TOKYO_CORP
+          </p>
+        </footer>
+      </main>
+
+      <div className="bottom-glow" aria-hidden="true" />
+      <div className="vignette-overlay" aria-hidden="true" />
+    </div>
   )
 }
 
